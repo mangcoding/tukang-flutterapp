@@ -3,21 +3,20 @@ import 'dart:ui';
 import 'package:validators/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:call_tukang/screens/login/login_screen_presenter.dart';
+import 'package:provider/provider.dart';
+import 'package:call_tukang/models/user.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return new LoginScreenState();
   }
 }
 
 class LoginScreenState extends State<LoginScreen>
     implements LoginScreenContract {
-  BuildContext _ctx;
 
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
-
   bool _isLoading = false;
   final formKey = new GlobalKey<FormState>();
   final scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -89,7 +88,6 @@ class LoginScreenState extends State<LoginScreen>
   @override
   void onLoginError(dynamic error) {
     // TODO: implement onLoginError
-    print(error);
     _showDialog("Opssss",error.message);
     setState(() {
       _isLoading = false;
@@ -97,18 +95,19 @@ class LoginScreenState extends State<LoginScreen>
   }
 
   @override
-  void onLoginSuccess(dynamic response) {
+  void onLoginSuccess(dynamic res) {
     // TODO: implement onLoginSuccess
-    print(response);
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
+    User user = User.map(res["user"]);
+    Profile profile = Profile.map(res["profile"]);
+    var userModel = Provider.of<UserModel>(context, listen:false);
+    userModel.user = user;
+    userModel.profile = profile;
     Navigator.of(context).pushNamed("/home");
   }
 
   @override
   Widget build(BuildContext context) {
-
     final emailField = TextFormField(
       validator: (value) => emailValidation(value),
       controller: _emailController,

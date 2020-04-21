@@ -9,12 +9,14 @@ class LoginScreenPresenter {
   LoginScreenContract _view;
   RestDatasource api = new RestDatasource();
   LoginScreenPresenter(this._view);
-
+  
   doLogin(String username, String password) {
     // print("Login dengan "+username+ " "+password);
     api
         .login(username, password)
-        .then((response) => _view.onLoginSuccess(response))
+        .then((response) async {
+          _view.onLoginSuccess(response["result"]);
+        })
         .catchError((onError) => _view.onLoginError(onError));
   }
 }
