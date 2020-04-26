@@ -21,6 +21,9 @@ class NetworkUtil {
       return _decoder.convert(res);
     });
   }
+  Future<dynamic> rawPost(String url, dynamic data) async {
+    return await http.post(url, body: data, headers: {"Accept": "application/json"});
+  }
 
   Future<dynamic> post(String url, {Map headers, body, encoding}) {
     return http
@@ -28,6 +31,12 @@ class NetworkUtil {
         .then((http.Response response) {
       final String res = response.body;
       final int statusCode = response.statusCode;
+      if (statusCode == 422) {
+        var data = _decoder.convert(res);
+        // print(data);
+        final Map<String, dynamic> jsonData = data;
+        jsonData.forEach((k,v) => throw new Exception("Error: "+v[0].toString()));
+      }
       if (statusCode < 200 || statusCode > 400 || json == null) {
         var jsondata = _decoder.convert(res);
         throw new Exception(jsondata["message"]);

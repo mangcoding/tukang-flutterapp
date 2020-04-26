@@ -1,10 +1,14 @@
 import 'dart:ui';
 
-import 'package:validators/validators.dart';
+import 'package:call_tukang/constants/constants.dart';
+import 'package:call_tukang/utils/validator.dart';
 import 'package:flutter/material.dart';
-import 'package:call_tukang/screens/login/login_screen_presenter.dart';
+import 'package:call_tukang/screens/login/action_presenter.dart';
 import 'package:provider/provider.dart';
 import 'package:call_tukang/models/user.dart';
+import 'package:call_tukang/screens/widgets/responsive_ui.dart';
+import 'package:call_tukang/screens/widgets/formfield.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -13,42 +17,23 @@ class LoginScreen extends StatefulWidget {
   }
 }
 
-class LoginScreenState extends State<LoginScreen>
-    implements LoginScreenContract {
-
+class LoginScreenState extends State<LoginScreen> implements ActionScreenContract {
+  Validator _validator = new Validator();
+  double _height;
+  double _width;
+  double _pixelRatio;
+  bool _large;
+  bool _medium;
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   bool _isLoading = false;
   final formKey = new GlobalKey<FormState>();
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
-  String emailValidation(String value) {
-    if (value.isEmpty) {
-      return "This field is required";
-    }
-    if (!isEmail(value)) {
-      return "Invalid email format";
-    }
-
-    return null;
-  }
-
-  // Validate password
-  String passwordValidation(String value) {
-    if (value.length <6) {
-      return "Password must have at least 6 charachter";
-    }
-    if (value.isEmpty) {
-      return "This field is required";
-    }
-
-    return null;
-  }
-
-  LoginScreenPresenter _presenter;
+  ActionScreenPresenter _presenter;
 
   LoginScreenState() {
-    _presenter = new LoginScreenPresenter(this);
+    _presenter = new ActionScreenPresenter(this);
   }
 
   void _submit() {
@@ -86,8 +71,7 @@ class LoginScreenState extends State<LoginScreen>
   }
 
   @override
-  void onLoginError(dynamic error) {
-    // TODO: implement onLoginError
+  void onActionError(dynamic error) {
     _showDialog("Opssss",error.message);
     setState(() {
       _isLoading = false;
@@ -95,55 +79,26 @@ class LoginScreenState extends State<LoginScreen>
   }
 
   @override
-  void onLoginSuccess(dynamic res) {
-    // TODO: implement onLoginSuccess
+  void onActionSuccess(dynamic res) {
     setState(() => _isLoading = false);
     User user = User.map(res["user"]);
     Profile profile = Profile.map(res["profile"]);
     var userModel = Provider.of<UserModel>(context, listen:false);
     userModel.user = user;
     userModel.profile = profile;
-    Navigator.of(context).pushNamed("/home");
+    Navigator.of(context).pushNamed(HOME);
   }
 
   @override
   Widget build(BuildContext context) {
-    final emailField = TextFormField(
-      validator: (value) => emailValidation(value),
-      controller: _emailController,
-      obscureText: false,
-      style: style,
-      decoration: InputDecoration(
-          contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          hintText: "Email",
-          border:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
-    );
-    final passwordField = TextFormField(
-      validator: (value) => passwordValidation(value),
-                  controller: _passwordController,
-      obscureText: true,
-      style: style,
-      decoration: InputDecoration(
-          contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          hintText: "Password",
-          border:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
-    );
-    final loginButon = Material(
-      elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
-      color: Color(0xff01A0C7),
-      child: MaterialButton(
-        minWidth: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-        onPressed: _submit,
-        child: Text("Login",
-            textAlign: TextAlign.center,
-            style: style.copyWith(
-                color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
-    );
+    _height = MediaQuery.of(context).size.height;
+     _width = MediaQuery.of(context).size.width;
+     _pixelRatio = MediaQuery.of(context).devicePixelRatio;
+     _large =  ResponsiveWidget.isScreenLarge(_width, _pixelRatio);
+     _medium =  ResponsiveWidget.isScreenMedium(_width, _pixelRatio);
+    final emailField = CustomTextField(validatorAction: (value)=> _validator.validateEmail(value), keyboardType: TextInputType.emailAddress, textEditingController:_emailController, icon: Icons.email, hint: "Email ID", );
+    final passwordField = CustomTextField( validatorAction: (value)=> _validator.validatePasswordLength(value), keyboardType: TextInputType.text, textEditingController:_passwordController, obscureText: true, icon: Icons.lock, hint: "Password");
+    final loginButon = CustomButton(hint:"Sign in",callAction:_submit,minWidth:MediaQuery.of(context).size.width);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -155,7 +110,7 @@ class LoginScreenState extends State<LoginScreen>
             child: Container(
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.all(36.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -173,12 +128,13 @@ class LoginScreenState extends State<LoginScreen>
                       child: Column(
                         children: <Widget>[
                           emailField,
-                          SizedBox(height: 25.0),
+                          SizedBox(height: _height / 25),
                           passwordField,
-                          SizedBox(
-                            height: 35.0,
-                          ),
-                          _isLoading ? new CircularProgressIndicator() : loginButon
+                          forgetPassTextRow(),
+                          SizedBox(height: _height / 25),
+                          _isLoading ? new CircularProgressIndicator() : loginButon,
+                          SizedBox(height: _height / 25),
+                          signUpTextRow()
                         ]
                       ),
                     ),
@@ -192,6 +148,62 @@ class LoginScreenState extends State<LoginScreen>
           ),
         ),
       )
+    );
+  }
+  Widget forgetPassTextRow() {
+    return Container(
+      margin: EdgeInsets.only(top: _height / 40.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            "Forgot your password?",
+            style: TextStyle(fontWeight: FontWeight.w400,fontSize: _large? 14: (_medium? 12: 10)),
+          ),
+          SizedBox(
+            width: 5,
+          ),
+          GestureDetector(
+            onTap: () {
+              print("Routing");
+            },
+            child: Text(
+              "Recover",
+              style: TextStyle(
+                  fontWeight: FontWeight.w600, color: Color(0xff01A0C7)),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget signUpTextRow() {
+    return Container(
+      margin: EdgeInsets.only(top: _height / 120.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            "Don't have an account?",
+            style: TextStyle(fontWeight: FontWeight.w400,fontSize: _large? 14: (_medium? 12: 10)),
+          ),
+          SizedBox(
+            width: 5,
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed(SIGN_UP);
+              print("Routing to Sign up screen");
+            },
+            child: Text(
+              "Sign up",
+              style: TextStyle(
+                  fontWeight: FontWeight.w800, color: Color(0xff01A0C7), fontSize: _large? 19: (_medium? 17: 15)),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
