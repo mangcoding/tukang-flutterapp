@@ -1,4 +1,11 @@
 class Validator {
+  String validateRequired(String value) {
+    if (value.isEmpty) {
+      return "This field is required";
+    }
+    return null;
+  }
+
   String validateName(String value) {
     String pattern = r'(^[a-zA-Z ]*$)';
     RegExp regExp = new RegExp(pattern);
@@ -26,8 +33,8 @@ class Validator {
   String validatePasswordLength(String value){
     if(value.length==0){
       return "Password can't be empty";
-    } else if (value.length < 10){
-      return "Password must be longer than 10 characters";
+    } else if (value.length < 6){
+      return "Password must be longer than 6 characters";
     }
     return null;
   }

@@ -7,7 +7,6 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return new Scaffold(
-      appBar: new AppBar(title: new Text("Home"),),
       body: new Padding(
         padding: const EdgeInsets.all(10.0),
         child: ProfileDescription(),

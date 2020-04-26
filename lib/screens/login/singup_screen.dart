@@ -6,7 +6,7 @@ import 'package:call_tukang/screens/widgets/formfield.dart';
 import 'package:call_tukang/screens/login/action_presenter.dart';
 import 'package:provider/provider.dart';
 import 'package:call_tukang/models/user.dart';
-
+import 'package:call_tukang/utils/validator.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -28,7 +28,9 @@ class _SignUpScreenState extends State<SignUpScreen> implements ActionScreenCont
   TextEditingController _firstNameController = TextEditingController();
   TextEditingController _lastNameController = TextEditingController();
   TextEditingController _phoneController = TextEditingController();
+  Map<String, dynamic> _errorValidationMessage = {};
   ActionScreenPresenter _presenter;
+  Validator _validator = new Validator();
 
   bool _isLoading = false;
 
@@ -78,7 +80,11 @@ class _SignUpScreenState extends State<SignUpScreen> implements ActionScreenCont
 
   @override
   void onActionError(dynamic error) {
-    _showDialog("Opssss",error.message);
+    if (error["message"] != null) {
+      _showDialog("Opssss",error["message"]);
+    }else{
+      _errorValidationMessage.addAll(error);
+    }
     setState(() {
       _isLoading = false;
     });
@@ -209,6 +215,7 @@ class _SignUpScreenState extends State<SignUpScreen> implements ActionScreenCont
   }
   Widget firstNameTextFormField() {
     return CustomTextField(
+      validatorAction: (value)=> _validator.validateRequired(value),
       keyboardType: TextInputType.text,
       textEditingController:_firstNameController,
       icon: Icons.person,
@@ -218,6 +225,7 @@ class _SignUpScreenState extends State<SignUpScreen> implements ActionScreenCont
 
   Widget lastNameTextFormField() {
     return CustomTextField(
+      validatorAction: (value)=> _validator.validateRequired(value),
       keyboardType: TextInputType.text,
       textEditingController:_lastNameController,
       icon: Icons.person,
@@ -227,8 +235,10 @@ class _SignUpScreenState extends State<SignUpScreen> implements ActionScreenCont
 
   Widget emailTextFormField() {
     return CustomTextField(
+      validatorAction: (value)=> _validator.validateEmail(value),
       keyboardType: TextInputType.emailAddress,
       textEditingController:_emailController,
+      errorText:_errorValidationMessage["email"] != null ? _errorValidationMessage["email"][0] : null,
       icon: Icons.email,
       hint: "Email ID",
     );
@@ -236,8 +246,10 @@ class _SignUpScreenState extends State<SignUpScreen> implements ActionScreenCont
 
   Widget phoneTextFormField() {
     return CustomTextField(
+      validatorAction: (value)=> _validator.validateRequired(value),
       keyboardType: TextInputType.number,
       textEditingController:_phoneController,
+      errorText:_errorValidationMessage["phone"] != null ? _errorValidationMessage["phone"][0] : null,
       icon: Icons.phone,
       hint: "Mobile Number",
     );
@@ -245,6 +257,7 @@ class _SignUpScreenState extends State<SignUpScreen> implements ActionScreenCont
 
   Widget passwordTextFormField() {
     return CustomTextField(
+      validatorAction: (value)=> _validator.validatePasswordLength(value),
       keyboardType: TextInputType.text,
       textEditingController:_passwordController,
       obscureText: true,

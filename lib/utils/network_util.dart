@@ -14,9 +14,8 @@ class NetworkUtil {
     return http.get(url).then((http.Response response) {
       final String res = response.body;
       final int statusCode = response.statusCode;
-      if (statusCode < 200 || statusCode > 400 || json == null) {
-        var jsondata = _decoder.convert(res);
-        throw new Exception(jsondata["message"]);
+      if (statusCode < 200 || statusCode > 400) {
+        throw new Exception(res);
       }
       return _decoder.convert(res);
     });
@@ -31,15 +30,8 @@ class NetworkUtil {
         .then((http.Response response) {
       final String res = response.body;
       final int statusCode = response.statusCode;
-      if (statusCode == 422) {
-        var data = _decoder.convert(res);
-        // print(data);
-        final Map<String, dynamic> jsonData = data;
-        jsonData.forEach((k,v) => throw new Exception("Error: "+v[0].toString()));
-      }
-      if (statusCode < 200 || statusCode > 400 || json == null) {
-        var jsondata = _decoder.convert(res);
-        throw new Exception(jsondata["message"]);
+      if (statusCode < 200 || statusCode > 400) {
+        throw new Exception(res);
       }
       return _decoder.convert(res);
     });

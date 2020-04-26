@@ -1,4 +1,5 @@
 import 'package:call_tukang/data/rest_ds.dart';
+import 'dart:convert';
 
 abstract class ActionScreenContract {
   void onActionSuccess(dynamic resp);
@@ -9,23 +10,30 @@ class ActionScreenPresenter {
   ActionScreenContract _view;
   RestDatasource api = new RestDatasource();
   ActionScreenPresenter(this._view);
-  
+  final JsonDecoder _decoder = new JsonDecoder();
+
   doLogin(String username, String password) {
-    // print("Login dengan "+username+ " "+password);
     api
         .login(username, password)
         .then((response) async {
           _view.onActionSuccess(response["result"]);
         })
-        .catchError((onError) => _view.onActionError(onError));
+        .catchError((onError) async {
+          String errMsg = onError.toString().replaceFirst(new RegExp(r'Exception: '), '');
+          var error = _decoder.convert(errMsg);
+          _view.onActionError(error);
+        });
   }
   doSignUp(dynamic datas) {
-    // print("Login dengan "+username+ " "+password);
     api
         .register(datas)
         .then((response) async {
           _view.onActionSuccess(response["result"]);
         })
-        .catchError((onError) => _view.onActionError(onError));
+        .catchError((onError) async {
+          String errMsg = onError.toString().replaceFirst(new RegExp(r'Exception: '), '');
+          var error = _decoder.convert(errMsg);
+          _view.onActionError(error);
+        });
   }
 }

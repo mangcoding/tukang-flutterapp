@@ -13,6 +13,7 @@ class CustomTextField extends StatelessWidget {
   double _pixelRatio;
   bool large;
   bool medium;
+  String errorText;
 
 
   CustomTextField(
@@ -22,6 +23,7 @@ class CustomTextField extends StatelessWidget {
       this.icon,
       this.obscureText= false,
       this.validatorAction,
+      this.errorText,
      });
 
   @override
@@ -36,6 +38,7 @@ class CustomTextField extends StatelessWidget {
         validator: validatorAction,
         obscureText: obscureText,
         decoration: InputDecoration(
+          errorText: errorText,
           contentPadding: EdgeInsets.symmetric(vertical: 15),
           border: InputBorder.none,
           prefixIcon: Icon(icon, color: Color(0xff01A0C7), size: 20),

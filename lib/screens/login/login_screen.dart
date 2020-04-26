@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:call_tukang/constants/constants.dart';
 import 'package:call_tukang/utils/validator.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:call_tukang/models/user.dart';
 import 'package:call_tukang/screens/widgets/responsive_ui.dart';
 import 'package:call_tukang/screens/widgets/formfield.dart';
-
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -31,6 +29,7 @@ class LoginScreenState extends State<LoginScreen> implements ActionScreenContrac
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   ActionScreenPresenter _presenter;
+  Map<String, dynamic> _errorValidationMessage;
 
   LoginScreenState() {
     _presenter = new ActionScreenPresenter(this);
@@ -72,7 +71,11 @@ class LoginScreenState extends State<LoginScreen> implements ActionScreenContrac
 
   @override
   void onActionError(dynamic error) {
-    _showDialog("Opssss",error.message);
+    if (error["message"] != null) {
+      _showDialog("Opssss",error["message"]);
+    }else{
+      _errorValidationMessage.addAll(error);
+    }
     setState(() {
       _isLoading = false;
     });
