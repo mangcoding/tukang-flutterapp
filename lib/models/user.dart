@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 class UserModel extends ChangeNotifier {
   User _user;
   Profile _profile;
+  bool _isAuthenticated = false;
 
   User get user => _user;
   Profile get profile => _profile;
@@ -15,6 +16,22 @@ class UserModel extends ChangeNotifier {
 
   set profile(Profile data) {
     _profile = data;
+    notifyListeners();
+  }
+
+  bool isAuthenticated() {
+    return _isAuthenticated;
+  }
+
+  void login() {
+    _isAuthenticated = true;
+    notifyListeners();
+  }
+
+  void logout() {
+    _isAuthenticated = false;
+    _user = null;
+    _profile = null;
     notifyListeners();
   }
 }

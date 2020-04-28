@@ -37,8 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget dashboard(context) {
     final userModel = Provider.of<UserModel>(context);
     final _profile = userModel.profile;
-    String lastName = _profile.lastName != null ? _profile.lastName : "";
-    String fullName = _profile.firstName+" "+lastName;
+    String lastName = _profile != null && _profile.lastName != null ? _profile.lastName : "";
+    String fullName = _profile != null ? _profile.firstName+" "+lastName : "";
     Color fontColor = Colors.black;
 
     return Scaffold(
@@ -69,11 +69,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 5,
                     ),
                     Text(
-                      _profile.phone,
+                      _profile != null ? _profile.phone : "",
                       style: TextStyle(color: Colors.black),
                     ),
                     Text(
-                      _profile.email,
+                      _profile != null ? _profile.email : "",
                       style: TextStyle(color: Colors.black),
                     ),
                   ],

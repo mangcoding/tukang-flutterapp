@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:call_tukang/constants/constants.dart';
+import 'package:call_tukang/models/user.dart';
 
 class CustomAppBar extends StatelessWidget {
   @override
   String _title;
   final void Function() leftAction;
+  BuildContext _context;
+
+  void logout() {
+    Provider.of<UserModel>(_context, listen: false).logout();
+    Navigator.of(_context).pop(SIGN_IN);
+  }
 
   CustomAppBar(this._title, this.leftAction);
   Widget _simplePopup() => PopupMenuButton<int>(
@@ -46,7 +55,12 @@ class CustomAppBar extends StatelessWidget {
           ),
         ],
     onSelected: (value) {
-      print("value:$value");
+      if (value == 3) {
+        logout();
+      }
+      else {
+        print("value:$value");
+      }
     },
     icon: Icon(
       Icons.more_vert,
@@ -56,6 +70,7 @@ class CustomAppBar extends StatelessWidget {
   );
 
   Widget build(BuildContext context) {
+    _context = context;
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     Color fontColor = Colors.white;
