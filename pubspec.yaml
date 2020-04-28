@@ -17,6 +17,7 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
+  google_fonts: ^0.2.0
   flutter:
     sdk: flutter
 
@@ -46,6 +47,13 @@ flutter:
   uses-material-design: true
   assets:
     - logo.png
+    - calendar.png
+    - festival.png
+    - food.png
+    - map.png
+    - notification.png
+    - setting.png
+    - todo.png
   fonts:
     - family: Montserrat
       fonts:

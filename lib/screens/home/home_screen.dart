@@ -1,50 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:call_tukang/models/user.dart';
 import 'package:provider/provider.dart';
+import 'package:call_tukang/screens/home/griddashboard.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:call_tukang/screens/widgets/customappbar.dart';
+import 'package:call_tukang/screens/widgets/drawer.dart';
 
-class HomeScreen extends StatelessWidget {
+final Color backgroundColor = Colors.white;
+
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _callMenu() {
+    _scaffoldKey.currentState.openDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return new Scaffold(
-      body: new Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: ProfileDescription(),
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: backgroundColor,
+      drawer: AppDrawer(),
+      body: Stack(
+        children: <Widget>[
+          dashboard(context),
+        ],
       ),
     );
   }
 
-}
-
-class ProfileDescription extends StatelessWidget {
-  const ProfileDescription({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget dashboard(context) {
     final userModel = Provider.of<UserModel>(context);
     final _profile = userModel.profile;
     String lastName = _profile.lastName != null ? _profile.lastName : "";
     String fullName = _profile.firstName+" "+lastName;
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      //ADA 4 BAGIAN YANG MEMBENTUK LIST SECARA VERTICAL, MAKA COLUMN MENGAMBIL PERANNYA
-      //SEMUANYA MUDAH KARENA HANYA MENAMPILKAN TEKS BIASA SAJA
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    Color fontColor = Colors.black;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
         children: <Widget>[
-          Text(
-            fullName,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          Opacity(opacity: 0.88,child: CustomAppBar("Home",_callMenu)),
+          SizedBox(
+            height: 20,
           ),
-          Text(
-            _profile.phone,
-            style: TextStyle(color: Colors.grey),
+          Padding(
+            padding: EdgeInsets.only(left: 16, right: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      fullName,
+                      style: GoogleFonts.openSans(
+                          textStyle: TextStyle(
+                          color: fontColor,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold)),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      _profile.phone,
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    Text(
+                      _profile.email,
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          Text(
-            _profile.email,
+          SizedBox(
+            height: 40,
           ),
+         GridDashboard(),
         ],
       ),
     );
