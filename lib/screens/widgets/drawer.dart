@@ -1,36 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:call_tukang/constants/constants.dart';
+import 'package:call_tukang/models/user.dart';
 
 class AppDrawer extends StatelessWidget {
+  BuildContext _context;
+
   @override
+  void logout() {
+    Provider.of<UserModel>(_context, listen: false).logout();
+    Navigator.pushReplacementNamed(_context,SIGN_IN);
+  }
+
   Widget build(BuildContext context) {
+    _context = context;
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           _createHeader(),
           _createDrawerItem(
-              icon: Icons.contacts,
-              text: 'Contacts',
-              onTap: () =>
-                  print("contacts")),
-          _createDrawerItem(
-              icon: Icons.event,
-              text: 'Events',
-              onTap: () =>
-                  print("events")),
-          _createDrawerItem(
               icon: Icons.note,
-              text: 'Notes',
+              text: 'Orders',
               onTap: () =>
                   print("notes")),
           Divider(),
-          _createDrawerItem(icon: Icons.collections_bookmark, text: 'Steps'),
-          _createDrawerItem(icon: Icons.face, text: 'Authors'),
+          _createDrawerItem(icon: Icons.collections_bookmark, text: 'Categories'),
+          _createDrawerItem(icon: Icons.face, text: 'Tentang Kami'),
           _createDrawerItem(
-              icon: Icons.account_box, text: 'Flutter Documentation'),
-          _createDrawerItem(icon: Icons.stars, text: 'Useful Links'),
+              icon: Icons.account_box, text: 'Trackings'),
           Divider(),
-          _createDrawerItem(icon: Icons.exit_to_app, text: 'Logout'),
+          _createDrawerItem(icon: Icons.exit_to_app, text: 'Logout',onTap: () => logout()),
         ],
       ),
     );

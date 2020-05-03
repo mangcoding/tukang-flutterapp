@@ -1,34 +1,37 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:call_tukang/constants/constants.dart';
 
 class GridDashboard extends StatelessWidget {
+  static BuildContext _context;
+
   Items item1 = new Items(
-    title: "Calendar",
+    title: "Order",
     img: "assets/calendar.png",
     callAction: (){
-      print("Calendar clicked");
+      Navigator.of(_context).pushNamed(ORDER);
     },
   );
 
   Items item2 = new Items(
-    title: "Groceries",
+    title: "Categories",
     img: "assets/food.png",
     callAction: (){
-      print("Groceries clicked");
+      Navigator.of(_context).pushNamed(ORDER);
     },
   );
 
   Items item3 = new Items(
-    title: "Locations",
+    title: "Tracking",
     img: "assets/map.png",
     callAction: (){
-      print("Locations clicked");
+      Navigator.of(_context).pushNamed(HOME);
     },
   );
 
   Items item4 = new Items(
-    title: "Activity",
+    title: "Tentang Kami",
     img: "assets/festival.png",
     callAction: (){
       print("Activity clicked");
@@ -53,6 +56,7 @@ class GridDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _context = context;
     final List<Items> myList = [item1, item2, item3, item4, item5, item6];
     Color fontColor = Colors.white;
     Color bgColor = Color(0xff01A0C7);

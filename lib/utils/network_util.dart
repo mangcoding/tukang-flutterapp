@@ -26,8 +26,8 @@ class NetworkUtil {
 
   Future<dynamic> post(String url, {Map headers, body, encoding}) {
     return http
-        .post(url, body: body, headers: headers, encoding: encoding)
-        .then((http.Response response) {
+    .post(url, body: body, headers: headers, encoding: encoding)
+    .then((http.Response response) {
       final String res = response.body;
       final int statusCode = response.statusCode;
       if (statusCode < 200 || statusCode > 400) {

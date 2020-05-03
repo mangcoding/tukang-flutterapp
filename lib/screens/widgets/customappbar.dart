@@ -11,7 +11,7 @@ class CustomAppBar extends StatelessWidget {
 
   void logout() {
     Provider.of<UserModel>(_context, listen: false).logout();
-    Navigator.of(_context).pop(SIGN_IN);
+    Navigator.pushReplacementNamed(_context,SIGN_IN);
   }
 
   CustomAppBar(this._title, this.leftAction);
