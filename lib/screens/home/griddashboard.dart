@@ -23,10 +23,10 @@ class GridDashboard extends StatelessWidget {
   );
 
   Items item3 = new Items(
-    title: "Tracking",
+    title: "History",
     img: "assets/map.png",
     callAction: (){
-      Navigator.of(_context).pushNamed(HOME);
+      Navigator.of(_context).pushNamed(HISTORY);
     },
   );
 

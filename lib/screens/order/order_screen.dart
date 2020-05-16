@@ -8,27 +8,31 @@ import 'package:geolocator/geolocator.dart';
 import 'package:call_tukang/actions/action_presenter.dart';
 import 'package:call_tukang/models/user.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:call_tukang/screens/widgets/formfield.dart';
 
-class Testing extends StatefulWidget {
+class Order extends StatefulWidget {
   @override
-  TestingState createState() => TestingState();
+  OrderState createState() => OrderState();
 }
 
-class TestingState extends State<Testing> implements ActionScreenContract  {
+class OrderState extends State<Order> implements ActionScreenContract  {
   Completer<GoogleMapController> _controller = Completer();
   Set<Marker> _markers = {};
+  List<dynamic> _merchantData = [];
   static LatLng _initialPosition;
   static LatLng _lastMapPosition = _initialPosition;
   ActionScreenPresenter _presenter;
-  bool _isLoading = false;
+  bool _isLoading = true;
   String _token;
   int _userid;
   int _markersLength = 0;
   BitmapDescriptor pinLocationIcon;
-
+  final formKey = new GlobalKey<FormState>();
+  TextEditingController _noteController = TextEditingController();
   BuildContext _context;
 
-  TestingState() {
+  OrderState() {
     _presenter = new ActionScreenPresenter(this);
   }
 
@@ -75,18 +79,131 @@ class TestingState extends State<Testing> implements ActionScreenContract  {
       ImageConfiguration(devicePixelRatio: 2.5),
       'assets/map.png');
    }
-
+  void _onMarkerTapped(int markerId) {
+    showOrderForm(_context, markerId);
+  }
+  void showOrderForm(BuildContext context, int markerId) {
+    dynamic merchantSelected = _merchantData[markerId];
+    final emailField = CustomTextField(maxLines: 3, keyboardType: TextInputType.emailAddress, textEditingController:_noteController, hint: "Catatan untuk Tukang Services", );
+    Dialog fancyDialog = Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        width: 300.0,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(12),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(topLeft: const Radius.circular(12.0), topRight: const Radius.circular(12.0)),
+                color: Colors.blue[300]
+              ),
+              child: Text(
+                merchantSelected["name"].toString(),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(12),
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Address: ${merchantSelected["address"]}",
+                    style: GoogleFonts.openSans(),
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    merchantSelected["price"] != null ? "Price: ${merchantSelected["price"]}" : "Price: Custom Price",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(12),
+              child:
+                Form(
+                  key: formKey,
+                  child: Column(
+                    children: <Widget>[
+                      emailField,
+                      SizedBox(height:10),
+                    ]
+                  ),
+                ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                RaisedButton(
+                  color: Colors.blue,
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Order Now',
+                    style: TextStyle(fontSize: 18.0, color: Colors.white),
+                  ),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                RaisedButton(
+                  color: Colors.red,
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Cancel!',
+                    style: TextStyle(fontSize: 18.0, color: Colors.white),
+                  ),
+                )
+              ],
+            ),
+            SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => fancyDialog);
+  }
   void onActionSuccess(dynamic merchants) {
     final List<dynamic> jsonData = merchants["merchants"];
+    _merchantData = jsonData;
     jsonData.forEach((v) {
       // print(v);
+      int index = jsonData.indexOf(v);
       _markersLength++;
+      final MarkerId markerId = MarkerId(v["id"].toString());
       _markers.add(
         Marker(
-          markerId: MarkerId(v["id"].toString()),
+          markerId: markerId,
           position: LatLng(double.parse(v["lattitudes"]), double.parse(v["longitudes"])),
-          infoWindow: InfoWindow(title: v["name"]),
-          icon: pinLocationIcon
+          // infoWindow: InfoWindow(title: v["name"]),
+          icon: pinLocationIcon,
+          onTap: () {
+            _onMarkerTapped(index);
+          },
         )
       );
     });
@@ -119,19 +236,13 @@ class TestingState extends State<Testing> implements ActionScreenContract  {
     }
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xff2a83d0),
         leading: IconButton(
-            icon: Icon(FontAwesomeIcons.arrowLeft),
-            onPressed: () {
-              Navigator.of(context).pop(HOME);
-            }),
-        title: Text("Order Service di Sekitar Anda"),
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(FontAwesomeIcons.search),
-              onPressed: () {
-                
-              }),
-        ],
+          icon: Icon(FontAwesomeIcons.arrowLeft,size: 20.0),
+          onPressed: () {
+            Navigator.of(context).pop(HOME);
+          }),
+          title: Text("Order Service di Sekitar Anda")
       ),
       body: Stack(
         children: <Widget>[

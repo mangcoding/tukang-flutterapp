@@ -5,6 +5,8 @@ import 'package:call_tukang/screens/home/griddashboard.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:call_tukang/screens/widgets/customappbar.dart';
 import 'package:call_tukang/screens/widgets/drawer.dart';
+import 'package:call_tukang/screens/widgets/footer_nav.dart';
+import 'package:call_tukang/constants/constants.dart';
 
 final Color backgroundColor = Colors.white;
 
@@ -15,13 +17,26 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  String _lastSelected = 'TAB: 0';
+  BuildContext _context;
   void _callMenu() {
     _scaffoldKey.currentState.openDrawer();
   }
 
+  void _selectedTab(int index) {
+    setState(() {
+      _lastSelected = 'TAB: $index';
+      if (index == 0) {
+        _callMenu();
+      }else if (index == 2) {
+        Navigator.of(_context).pushNamed(ORDER);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _context = context;
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: backgroundColor,
@@ -29,6 +44,19 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: <Widget>[
           dashboard(context),
+        ],
+      ),
+      bottomNavigationBar: FABBottomAppBar(
+        color: Colors.grey,
+        selectedColor: Color(0xff01A0C7),
+        notchedShape: CircularNotchedRectangle(),
+        onTabSelected: _selectedTab,
+        items: [
+          FABBottomAppBarItem(iconData: Icons.menu, text: 'Menu'),
+          FABBottomAppBarItem(iconData: Icons.home, text: 'Home'),
+          FABBottomAppBarItem(iconData: Icons.note_add, text: 'Orders'),
+          FABBottomAppBarItem(iconData: Icons.settings, text: 'Settings'),
+          FABBottomAppBarItem(iconData: Icons.info, text: 'About'),
         ],
       ),
     );

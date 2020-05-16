@@ -14,10 +14,13 @@ class CustomTextField extends StatelessWidget {
   bool large;
   bool medium;
   String errorText;
+  int maxLines;
 
 
   CustomTextField(
-    {this.hint,
+    {
+      this.maxLines=1,
+      this.hint,
       this.textEditingController,
       this.keyboardType,
       this.icon,
@@ -34,6 +37,7 @@ class CustomTextField extends StatelessWidget {
     medium=  ResponsiveWidget.isScreenMedium(_width, _pixelRatio);
     return Container(
       child: TextFormField(
+        maxLines: maxLines,
         controller: textEditingController,
         validator: validatorAction,
         obscureText: obscureText,
@@ -41,7 +45,7 @@ class CustomTextField extends StatelessWidget {
           errorText: errorText,
           contentPadding: EdgeInsets.symmetric(vertical: 15),
           border: InputBorder.none,
-          prefixIcon: Icon(icon, color: Color(0xff01A0C7), size: 20),
+          prefixIcon: icon != null ? Icon(icon, color: Color(0xff01A0C7), size: 20) : null,
           hintText: hint
         ),
       ),

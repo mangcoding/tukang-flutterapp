@@ -79,7 +79,7 @@ class CustomAppBar extends StatelessWidget {
       child: Container(
         height: height/10,
         width: width,
-        padding: EdgeInsets.only(left: 15, top: 25),
+        padding: EdgeInsets.only(left: 0, top: 25),
         decoration: BoxDecoration(
           gradient: LinearGradient(
               colors:[Color(0xff01A0C7), Color(0xff2a83d0)]
@@ -91,10 +91,10 @@ class CustomAppBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.max,
           children: [
-            InkWell(
-              child: Icon(Icons.menu, color: fontColor),
-              onTap: leftAction
-            ),
+            // InkWell(
+            //   child: Icon(Icons.menu, color: fontColor),
+            //   onTap: leftAction
+            // ),
             Text(_title, style: TextStyle(fontSize: 20, color: fontColor)),
             _simplePopup()
           ],
