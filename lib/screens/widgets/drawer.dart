@@ -26,9 +26,9 @@ class AppDrawer extends StatelessWidget {
                   print("notes")),
           Divider(),
           _createDrawerItem(icon: Icons.collections_bookmark, text: 'Categories'),
-          _createDrawerItem(icon: Icons.face, text: 'Tentang Kami'),
+          _createDrawerItem(icon: Icons.face, text: 'About Us'),
           _createDrawerItem(
-              icon: Icons.account_box, text: 'Trackings'),
+              icon: Icons.history, text: 'History'),
           Divider(),
           _createDrawerItem(icon: Icons.exit_to_app, text: 'Logout',onTap: () => logout()),
         ],

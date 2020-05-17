@@ -43,16 +43,15 @@ class ActionScreenPresenter {
       _view.onActionSuccess(response);
     })
     .catchError((onError) async {
-        String errMsg = onError.toString().replaceFirst(new RegExp(r'Exception: '), '');
+      String errMsg = onError.toString().replaceFirst(new RegExp(r'Exception: '), '');
       var error = _decoder.convert(errMsg);
       _view.onActionError(error);
     });
   }
-  doOrder(dynamic datas, token, userid) {
-    datas.push("customer_id",userid);
+  doOrder(dynamic datas, token) {
     api.order(datas, token)
       .then((response) async {
-        _view.onActionSuccess(response["result"]);
+        _view.onActionSuccess(response);
       })
       .catchError((onError) async {
         String errMsg = onError.toString().replaceFirst(new RegExp(r'Exception: '), '');

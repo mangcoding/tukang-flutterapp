@@ -10,6 +10,8 @@ import 'package:call_tukang/models/user.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:call_tukang/screens/widgets/formfield.dart';
+import 'package:call_tukang/data/rest_ds.dart';
+import 'dart:convert';
 
 class Order extends StatefulWidget {
   @override
@@ -31,6 +33,8 @@ class OrderState extends State<Order> implements ActionScreenContract  {
   final formKey = new GlobalKey<FormState>();
   TextEditingController _noteController = TextEditingController();
   BuildContext _context;
+  RestDatasource api = new RestDatasource();
+  final JsonDecoder _decoder = new JsonDecoder();
 
   OrderState() {
     _presenter = new ActionScreenPresenter(this);
@@ -58,28 +62,15 @@ class OrderState extends State<Order> implements ActionScreenContract  {
       },
     );
   }
-  @override
-  void onActionError(dynamic error) {
-    if (error["message"] != null) {
-      _showDialog("Opssss",error["message"]);
-      final userModel = Provider.of<UserModel>(context);
-      userModel.logout();
-      Navigator.of(_context).pushNamed(SIGN_IN);
-    }else{
-      print(error);
-    }
-    setState(() {
-      _isLoading = false;
-    });
-  }
 
   @override
   void setCustomMapPin() async {
-      pinLocationIcon = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(devicePixelRatio: 2.5),
-      'assets/map.png');
-   }
+    pinLocationIcon = await BitmapDescriptor.fromAssetImage(
+    ImageConfiguration(devicePixelRatio: 2.5),
+    'assets/map.png');
+  }
   void _onMarkerTapped(int markerId) {
+    //print("marker Tap ${markerId}");
     showOrderForm(_context, markerId);
   }
   void showOrderForm(BuildContext context, int markerId) {
@@ -155,7 +146,21 @@ class OrderState extends State<Order> implements ActionScreenContract  {
                 RaisedButton(
                   color: Colors.blue,
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    _presenter.doOrder({
+                      "service_id": merchantSelected["id"].toString(),
+                      "price": merchantSelected["price"].toString(), 
+                      "notes": _noteController.text.toString(),
+                      "customer_id": _userid.toString()
+                    },_token);
+                    // final form = formKey.currentState;
+                    // if (form.validate()) {
+                    //   form.save();
+                    //   _presenter.doOrder({
+                    //     "service_id": merchantSelected["id"],
+                    //     "notes": merchantSelected["price"], 
+                    //     "price": _noteController.text,
+                    //   },_token,_userid);
+                    // }
                   },
                   child: Text(
                     'Order Now',
@@ -187,27 +192,20 @@ class OrderState extends State<Order> implements ActionScreenContract  {
     showDialog(
         context: context, builder: (BuildContext context) => fancyDialog);
   }
-  void onActionSuccess(dynamic merchants) {
-    final List<dynamic> jsonData = merchants["merchants"];
-    _merchantData = jsonData;
-    jsonData.forEach((v) {
-      // print(v);
-      int index = jsonData.indexOf(v);
-      _markersLength++;
-      final MarkerId markerId = MarkerId(v["id"].toString());
-      _markers.add(
-        Marker(
-          markerId: markerId,
-          position: LatLng(double.parse(v["lattitudes"]), double.parse(v["longitudes"])),
-          // infoWindow: InfoWindow(title: v["name"]),
-          icon: pinLocationIcon,
-          onTap: () {
-            _onMarkerTapped(index);
-          },
-        )
-      );
-    });
-    setState(() => _isLoading = false);
+
+  @override
+  void onActionError(dynamic error) {
+    if (error["message"] != null) {
+      _showDialog("Opssss",error["message"]);
+    }
+  }
+
+  void onActionSuccess(dynamic message) {
+    print(message);
+    if (message["message"] != null) {
+      _showDialog("Opssss",message["message"]);
+    }
+    Navigator.of(context).pushNamed(HISTORY);
   }
 
   @override
@@ -216,7 +214,7 @@ class OrderState extends State<Order> implements ActionScreenContract  {
     _getUserLocation();
     super.initState();
   }
-  double zoomVal=14.0;
+  double zoomVal=15.0;
 
   void _getUserLocation() async {
     Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
@@ -224,15 +222,43 @@ class OrderState extends State<Order> implements ActionScreenContract  {
       _initialPosition = LatLng(position.latitude, position.longitude);
     });
   }
-
+  void generateMarker(BuildContext context) async {
+    await api.services(_token).then((response) {
+        final List<dynamic> jsonData = response["merchants"];
+        _merchantData = jsonData;
+        jsonData.forEach((v) {
+          // print(v);
+          int index = jsonData.indexOf(v);
+          _markersLength++;
+          final MarkerId markerId = MarkerId(v["id"].toString());
+          _markers.add(
+            Marker(
+              markerId: markerId,
+              position: LatLng(double.parse(v["lattitudes"]), double.parse(v["longitudes"])),
+              // infoWindow: InfoWindow(title: v["name"]),
+              icon: pinLocationIcon,
+              onTap: () {
+                _onMarkerTapped(index);
+              },
+            )
+          );
+        });
+        setState(() => _isLoading = false);
+      })
+      .catchError((onError) async {
+          String errMsg = onError.toString().replaceFirst(new RegExp(r'Exception: '), '');
+          var error = _decoder.convert(errMsg);
+          _showDialog("Opssss",error["message"]);
+      });
+  }
   @override
   Widget build(BuildContext context) {
-     final userModel = Provider.of<UserModel>(context);
-    _context = context;
+    final userModel = Provider.of<UserModel>(context);
     _token = userModel.token;
     _userid = userModel.user.userId;
+    _context = context;
     if (_markersLength < 1) {
-      _presenter.getService(_token);
+      generateMarker(context);
     }
     return Scaffold(
       appBar: AppBar(
@@ -246,7 +272,7 @@ class OrderState extends State<Order> implements ActionScreenContract  {
       ),
       body: Stack(
         children: <Widget>[
-          _isLoading ? new CircularProgressIndicator() : _buildGoogleMap(context),
+          _isLoading ? Center( child:new CircularProgressIndicator()) : _buildGoogleMap(context),
           _zoomminusfunction(),
           _zoomplusfunction(),
           // _buildContainer(),

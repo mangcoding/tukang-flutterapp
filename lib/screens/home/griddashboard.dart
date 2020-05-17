@@ -31,7 +31,7 @@ class GridDashboard extends StatelessWidget {
   );
 
   Items item4 = new Items(
-    title: "Tentang Kami",
+    title: "About",
     img: "assets/festival.png",
     callAction: (){
       print("Activity clicked");
@@ -39,7 +39,7 @@ class GridDashboard extends StatelessWidget {
   );
 
   Items item5 = new Items(
-    title: "To do",
+    title: "FAQ",
     img: "assets/todo.png",
     callAction: (){
       print("Todo clicked");

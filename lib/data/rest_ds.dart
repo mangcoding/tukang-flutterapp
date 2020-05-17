@@ -9,6 +9,7 @@ class RestDatasource {
   static final REGISTER_URL = BASE_URL + "register";
   static final SERVICE_URL = BASE_URL + "merchant";
   static final ORDER_URL = BASE_URL + "order";
+  static final HISTORY_URL = BASE_URL + "order/history";
   static final _API_KEY = "";
 
   Future<dynamic> login(String username, String password) {
@@ -39,14 +40,21 @@ class RestDatasource {
       return data;
     });
   }
+  Future<dynamic> history(String token) {
+    return _netUtil.post(HISTORY_URL, 
+    body: {
+      "token":token, 
+    }).then((data) async {
+      return data;
+    });
+  }
   Future<dynamic> order(dynamic datas, String token) {
     return _netUtil.post(ORDER_URL, 
-    headers: {
-      "token": token,
-    },
     body: {
+      "token": token,
       "service_id": datas["service_id"],
       "customer_id": datas["customer_id"],
+      "notes": datas["notes"],
       "price": datas["price"],
     }).then((data) async {
       return data;

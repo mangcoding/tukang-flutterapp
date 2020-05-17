@@ -6,6 +6,8 @@ import 'package:call_tukang/models/user.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:call_tukang/constants/constants.dart';
+import 'package:call_tukang/data/rest_ds.dart';
+import 'dart:convert';
 
 class HistoryOrder extends StatefulWidget {
   @override
@@ -16,9 +18,55 @@ class _HistoryOrderState extends State<HistoryOrder> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String url = "";
   BuildContext _context;
+  int historyLength = 0;
+  List<dynamic> historyData = [];
+  RestDatasource api = new RestDatasource();
+  int _userid;
+  String _token;
+  bool _isLoading = true;
+  final JsonDecoder _decoder = new JsonDecoder();
 
   void _callMenu() {
     _scaffoldKey.currentState.openDrawer();
+  }
+
+  void _showDialog(String title, String message) {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text(title),
+          content: new Text(message),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void generateHistory(BuildContext context) async {
+    await api.history(_token).then((response) {
+        print(response);
+        final List<dynamic> jsonData = response["history"];
+        print(historyData);
+        historyData = jsonData;
+        historyLength = 1;
+        setState(() => _isLoading = false);
+      })
+      .catchError((onError) async {
+          String errMsg = onError.toString().replaceFirst(new RegExp(r'Exception: '), '');
+          var error = _decoder.convert(errMsg);
+          _showDialog("Opssss",error["message"]);
+      });
   }
 
   void _selectedTab(int index) {
@@ -39,6 +87,11 @@ class _HistoryOrderState extends State<HistoryOrder> {
   Widget build(BuildContext context) {
     _context = context;
     final userModel = Provider.of<UserModel>(context);
+    _token = userModel.token;
+    _userid = userModel.user.userId;
+    if (historyLength <1) {
+      generateHistory(_context);
+    }
     final _profile = userModel.profile;
     String lastName = _profile != null && _profile.lastName != null ? _profile.lastName : "";
     String fullName = _profile != null ? _profile.firstName+" "+lastName : "";
@@ -59,7 +112,8 @@ class _HistoryOrderState extends State<HistoryOrder> {
       ),
       body: ListView(
         padding: EdgeInsets.only(top: 0),
-        children: <Widget>[
+        children: 
+          <Widget>[
           //bar
           Opacity(opacity: 0.88,child: CustomAppBar("History",_callMenu)),
           //profile
@@ -111,14 +165,14 @@ class _HistoryOrderState extends State<HistoryOrder> {
           Container(
               height: 300,
               //margin: EdgeInsets.only(top: 0, left: 20, right: 20),
-              child: Flexible(
+              child: _isLoading ? Center( child:new CircularProgressIndicator()) : Flexible(
                 fit: FlexFit.tight,
                 child: ListView.separated(
                   separatorBuilder: (BuildContext context, int index) => Divider(),
-                  itemCount: 5,
+                  itemCount: historyData.length,
                   padding: EdgeInsets.all(5),
                   itemBuilder: (context, int index) {
-                    return createslide(index, "SON20050001");
+                    return createslide(index,historyData[index]);
                   }),
               )),
         ],
@@ -127,7 +181,7 @@ class _HistoryOrderState extends State<HistoryOrder> {
   }
 }
 
-Slidable createslide(int index, String noso) {
+Slidable createslide(int index, historyData) {
   return Slidable(
     actionPane: SlidableDrawerActionPane(),
     actionExtentRatio: 0.25,
@@ -135,21 +189,27 @@ Slidable createslide(int index, String noso) {
       child: Column(
         children: <Widget>[
           ListTile(
-            title: Text(noso),
+            title: Text(historyData["name"]),
             subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text("PT.ABC $index"),
-                  Text("03 May"),
+                  Text(historyData["merchant_name"]),
+                  Text(historyData["created_at"]),
                 ]),
             trailing:
               Column(
               children: <Widget>[
-                Text("25.000.000"),
-                (index % 2 == 0)
-                    ? Text("Approved", style: TextStyle(color: Colors.red))
-                    : Text("Not Approved", style: TextStyle(color: Colors.blue))
+                SizedBox(
+                  height: 5,
+                ),
+                (historyData["price"] == "On Calculating") 
+                  ? Text(historyData["price"], style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold, fontStyle: FontStyle.italic))
+                  : Text(historyData["price"])
+                ,
+                (historyData["status"] == "0")
+                    ? Text(historyData["statusMessage"], style: TextStyle(color: Colors.green))
+                    : Text(historyData["statusMessage"], style: TextStyle(color: Colors.blue))
               ],
             ),
           ),
